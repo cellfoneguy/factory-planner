@@ -1,0 +1,21 @@
+
+button {
+    background-color: rgb(134, 216, 134);
+}
+
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: lightgrey;
+}
+
+tr:hover {
+    background-color: aquamarine;
+}
+
+td {
+    text-align: center;
+}
