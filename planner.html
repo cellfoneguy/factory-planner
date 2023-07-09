@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-US">
   <head>
-    <title>Factory Planner</title>
+    <title>Adder</title>
     <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
     <link rel="stylesheet" href="./styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,38 +11,16 @@
 
   <body>
     <table id="table1">
-      <tr style="height: 100px;">
+      <tr style="height: 30px;">
         <th>Station</th>
-        <th>header2</th>
-        <th>header3</th>
-      </tr>
-      <tr>
-        <td>
-          <input type="text" id="station1" onchange="recalculate()"><br>
-        </td>
-        <td>
-          <input type="text" id="stationQ1" onchange="recalculate()"><br>
-        </td>
-        <td id = "result1">3</td>
-      </tr>
-      <tr>
-        <td>4</td>
-        <td>5</td>
-        <td>6</td>
-      </tr>
-      <tr>
-        <td>7</td>
-        <td>8</td>
-        <td>9</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td>0</td>
-        <td></td>
+        <th>Station Quantity</th>
+        <th>Recipe</th>
       </tr>
     </table>
-    <button type="button" onclick="addRow">Add Row</button>
+    <button type="button" onclick="addRow()">Add Row</button>
+    <button type="button" onclick="recalculate()">Recalculate</button>
     <br>
     <p><a href="./index.html">Back to Hohm</a></p>
+    <p id="debug">debug</p>
   </body>
 </html>
