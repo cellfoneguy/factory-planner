@@ -1,0 +1,26 @@
+{
+  "stations": [
+    {
+      "name": "Mining Machine",
+      "recipes": [
+        "Iron Ore",
+        "Copper Ore",
+        "Coal"
+      ]
+    },
+    {
+      "name": "Arc Smelter",
+      "recipes": [
+        "Iron Ingot",
+        "Copper Ingot",
+        "Energetic Graphite"
+      ]
+    },
+    {
+      "name": "Oil Extractor",
+      "recipes": [
+        "Extract Oil"
+      ]
+    }
+  ]
+}

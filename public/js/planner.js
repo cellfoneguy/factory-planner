@@ -1,41 +1,36 @@
 
-// globals
-// stations
-STATIONS = [
-  "Miner",
-  "Smelter",
-  "Oil Refinery",
-]
+// fetch data
+const res = await fetch("data.json");
+const data = await res.json()
 
-// recipes
-RECIPES = {};
-RECIPES["Miner"] = [
-  "Iron Ore",
-  "Copper Ore",
-  "Coal",
-];
-RECIPES["Smelter"] = [
-  "Iron Ingot",
-  "Copper Ingot",
-  "Energetic Graphene",
-];
-RECIPES["Oil Refinery"] = [
-  "Plasma Refining",
-]
+console.log(data);
+const STATIONS = data.stations;
+console.log(STATIONS);
 
-// populate the station selector dropdown
+// get station object by name
+function getStationByName(name) {
+  for (let i=0; i<STATIONS.length; i++) {
+    if (STATIONS[i].name == name) {
+      return STATIONS[i];
+    }
+  }
+  return null;
+}
+
+
+// init populate the station selector dropdown
 function populateStationSelector(stationSelector) {
   for (let i=0; i < STATIONS.length; i++) {
     let opt = document.createElement("option");
-    opt.text = STATIONS[i];
+    opt.text = STATIONS[i].name;
     stationSelector.add(opt, null);
   }
 }
 
-// populate the recipe selector dropdown
+// DEPRECATED - init populate the recipe selector dropdown
 function populateRecipeSelector (recipeSelector) {
   let station = recipeSelector.parentNode.parentNode.cells[0].children[0].value
-  let recipes = RECIPES[station];
+  let recipes = getStationByName(station).recipes;
   document.getElementById("debug").innerHTML = recipes;
   for (let i=0; i < recipes.length; i++) {
     let opt = document.createElement("option");
@@ -55,7 +50,7 @@ function repopulateRecipeSelector (evt) {
   }
 
   // repopulate
-  let recipes = RECIPES[stationSelector.value];
+  let recipes = getStationByName(stationSelector.value).recipes;
   for (let i=0; i < recipes.length; i++) {
     let opt = document.createElement("option");
     opt.text = recipes[i];
@@ -63,10 +58,19 @@ function repopulateRecipeSelector (evt) {
   }
 }
 
-function recalculate() {
+// when station is changed, reset station quantity field
+function clearStationQuantity (evt) {
+  let stationSelector = evt.currentTarget;
+  let stationQuantityInput = stationSelector.parentNode.parentNode.cells[1].children[0]
+  stationQuantityInput.value = '';
 }
 
-function addRow() {
+// manually trigger recalculations
+window.recalculate = function() {
+}
+
+// add a row(station) and its related cells
+window.addRow = function() {
   let tbl = document.getElementById("table1");
 
   let row = tbl.insertRow(-1);
@@ -78,6 +82,7 @@ function addRow() {
   stationCell.appendChild(stationSelector);
   populateStationSelector(stationSelector);
   stationSelector.addEventListener("change", repopulateRecipeSelector, false);
+  stationSelector.addEventListener("change", clearStationQuantity, false)
 
   // add station quantity
   let stationQuantityCell = row.insertCell(-1);
@@ -90,6 +95,13 @@ function addRow() {
   let recipeSelector = document.createElement("select");
   recipeSelector.setAttribute("class", "recipeAll");
   recipeCell.appendChild(recipeSelector);
-  populateRecipeSelector(recipeSelector);
-  recipeCell.appendChild(recipeSelector);
+  // trigger recipe population
+  let event = new Event('change');
+  stationSelector.dispatchEvent(event);
+
+  // add input quantity
+
+  // add input item type
+
+
 }
