@@ -3,9 +3,35 @@
 const res = await fetch("data.json");
 const data = await res.json()
 
-console.log(data);
 const STATIONS = data.stations;
-console.log(STATIONS);
+
+// get cell child (or cell if no child) from same row by column name
+function getChildInRowByName(obj, name) {
+  // go up family tree until we get the row object
+  let elem = obj;
+  while (elem.nodeName != "TR") {
+    elem = elem.parentNode;
+  }
+
+  switch(name) {
+    case "Station":
+      return elem.cells[0].children[0];
+    case "Station Quantity":
+      return elem.cells[1].children[0];
+    case "Recipe":
+      return elem.cells[2].children[0];
+    case "Input Quantity":
+      return elem.cells[3];
+    case "Input Item":
+      return elem.cells[4];
+    case "Output Quantity":
+      return elem.cells[5];
+    case "Output Item":
+      return elem.cells[6];
+    default:
+      throw new Error("getChildInRowByName(): name not found");
+  }
+}
 
 // get station object by name
 function getStationByName(name) {
@@ -14,7 +40,17 @@ function getStationByName(name) {
       return STATIONS[i];
     }
   }
-  return null;
+  throw new Error("getStationByName(): name not found");
+}
+
+// get recipe object by name
+function getRecipeByName(station, name) {
+  for (let i=0; i<station.recipes.length; i++) {
+    if (station.recipes[i].name == name) {
+      return station.recipes[i];
+    }
+  }
+  throw new Error("getRecipeByName(): name not found");
 }
 
 
@@ -39,10 +75,13 @@ function populateRecipeSelector (recipeSelector) {
   }
 }
 
-// when the station is changed, repopulate the recipe dropdown
-function repopulateRecipeSelector (evt) {
+// when the station is changed, clear station quantity, and repopulate the recipe dropdown and related fields
+function stationChanged(evt) {
   let stationSelector = evt.currentTarget;
-  let recipeSelector = stationSelector.parentNode.parentNode.cells[2].children[0]
+  let stationQuantityInput = getChildInRowByName(stationSelector, "Station Quantity");
+  stationQuantityInput.value = '';
+
+  let recipeSelector = getChildInRowByName(stationSelector, "Recipe");
 
   // clear dropdown
   while (recipeSelector.length > 0) {
@@ -53,20 +92,40 @@ function repopulateRecipeSelector (evt) {
   let recipes = getStationByName(stationSelector.value).recipes;
   for (let i=0; i < recipes.length; i++) {
     let opt = document.createElement("option");
-    opt.text = recipes[i];
+    opt.text = recipes[i].name;
     recipeSelector.add(opt, null);
   }
+
+  // now update recipe fields
+  let event = new Event("change");
+  recipeSelector.dispatchEvent(event);
 }
 
-// when station is changed, reset station quantity field
-function clearStationQuantity (evt) {
-  let stationSelector = evt.currentTarget;
-  let stationQuantityInput = stationSelector.parentNode.parentNode.cells[1].children[0]
-  stationQuantityInput.value = '';
-}
+// when station quantity or recipe is changed, repopulate inputs/outputs
+function recalculateQuantities(evt) {
+  // get field pointers
+  let stationQuantityInput = getChildInRowByName(evt.currentTarget, "Station Quantity");
+  let recipeSelector = getChildInRowByName(evt.currentTarget, "Recipe");
+  let inputQuantityCell = getChildInRowByName(evt.currentTarget, "Input Quantity");
+  let inputItemCell = getChildInRowByName(evt.currentTarget, "Input Item");
+  let outputQuantityCell = getChildInRowByName(evt.currentTarget, "Output Quantity");
+  let outputItemCell = getChildInRowByName(evt.currentTarget, "Output Item");
 
-// manually trigger recalculations
-window.recalculate = function() {
+  // get recipe
+  let stationName = getChildInRowByName(recipeSelector, "Station").value;
+  let recipe = getRecipeByName(getStationByName(stationName), recipeSelector.value);
+  
+  // recalculate. gatherers are a bit special with input quantities
+  inputItemCell.innerHTML = recipe.input;
+  outputItemCell.innerHTML = recipe.output;
+  if (stationName == "Mining Machine") {
+    inputQuantityCell.innerHTML = stationQuantityInput.value;
+  } else if (stationName == "Oil Extractor") {
+    inputQuantityCell.innerHTML = '';
+  } else {
+    inputQuantityCell.innerHTML = 1.0 * recipe.inputQuantityBase * stationQuantityInput.value * 60 / recipe.cycleTime;
+  }
+  outputQuantityCell.innerHTML = 1.0 * recipe.outputQuantityBase * stationQuantityInput.value * 60 / recipe.cycleTime;
 }
 
 // add a row(station) and its related cells
@@ -78,30 +137,48 @@ window.addRow = function() {
   // add station dropdown
   let stationCell = row.insertCell(-1);
   let stationSelector = document.createElement("select");
-  stationSelector.setAttribute("class", "stationSelector");
   stationCell.appendChild(stationSelector);
-  populateStationSelector(stationSelector);
-  stationSelector.addEventListener("change", repopulateRecipeSelector, false);
-  stationSelector.addEventListener("change", clearStationQuantity, false)
-
+  
   // add station quantity
   let stationQuantityCell = row.insertCell(-1);
   let stationQuantityInput = document.createElement("input");
+  stationQuantityInput.setAttribute("type", "number");
+  stationQuantityInput.setAttribute("min", "0");
   stationQuantityCell.appendChild(stationQuantityInput);
-  stationQuantityInput.setAttribute("type", "text");
 
   // add recipe
   let recipeCell = row.insertCell(-1);
   let recipeSelector = document.createElement("select");
   recipeSelector.setAttribute("class", "recipeAll");
   recipeCell.appendChild(recipeSelector);
-  // trigger recipe population
+
+  // add input quantity
+  let inputQuantityCell = row.insertCell(-1);
+
+  // add input item type
+  let inputItemCell = row.insertCell(-1);
+
+  // add output quantity
+  let outputQuantityCell = row.insertCell(-1);
+  
+  // add output item type
+  let outputItemCell = row.insertCell(-1);
+
+  /* POPULATE FIELDS */
+  // station
+  populateStationSelector(stationSelector);
+  let station = getStationByName(stationSelector.value);
+  stationSelector.addEventListener("change", stationChanged, false);
+
+  // station quantity
+  stationQuantityInput.addEventListener("change", recalculateQuantities, false);
+
+  // manually trigger recipe and related fields population
   let event = new Event('change');
   stationSelector.dispatchEvent(event);
 
-  // add input quantity
-
-  // add input item type
-
+  recipeSelector.addEventListener("change", recalculateQuantities, false);
+  event = new Event('change');
+  recipeSelector.dispatchEvent(event);
 
 }

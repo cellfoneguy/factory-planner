@@ -3,23 +3,72 @@
     {
       "name": "Mining Machine",
       "recipes": [
-        "Iron Ore",
-        "Copper Ore",
-        "Coal"
+        {
+          "name": "Iron",
+          "input": "Iron Ore Node",
+          "inputQuantityBase": 1,
+          "output": "Iron Ore",
+          "outputQuantityBase": 0.5,
+          "cycleTime": 1
+        },
+        {
+          "name": "Copper",
+          "input": "Copper Ore Node",
+          "inputQuantityBase": 1,
+          "output": "Copper Ore",
+          "outputQuantityBase": 0.5,
+          "cycleTime": 1
+        },
+        {
+          "name": "Coal",
+          "input": "Coal Node",
+          "inputQuantityBase": 1,
+          "output": "Coal",
+          "outputQuantityBase": 0.5,
+          "cycleTime": 1
+        }
       ]
     },
     {
       "name": "Arc Smelter",
       "recipes": [
-        "Iron Ingot",
-        "Copper Ingot",
-        "Energetic Graphite"
+        {
+          "name": "Iron Ingot",
+          "input": "Iron Ore",
+          "inputQuantityBase": 1,
+          "output": "Iron Ingot",
+          "outputQuantityBase": 1,
+          "cycleTime": 1
+        },
+        {
+          "name": "Copper Ingot",
+          "input": "Copper Ore",
+          "inputQuantityBase": 1,
+          "output": "Copper Ingot",
+          "outputQuantityBase": 1,
+          "cycleTime": 1
+        },
+        {
+          "name": "Energetic Graphite",
+          "input": "Coal",
+          "inputQuantityBase": 2,
+          "output": "Energetic Graphite",
+          "outputQuantityBase": 1,
+          "cycleTime": 2
+        }
       ]
     },
     {
       "name": "Oil Extractor",
       "recipes": [
-        "Extract Oil"
+        {
+          "name": "Extract Oil",
+          "input": "Crude Oil Seep",
+          "inputQuantityBase": 1,
+          "output": "Crude Oil",
+          "outputQuantityBase": 1,
+          "cycleTime": 1
+        }
       ]
     }
   ]
